@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: 255 255 255;
+  --foreground: 15 23 42;
+  --muted: 248 250 252;
+  --muted-foreground: 71 85 105;
+  --border: 226 232 240;
+  --card: 255 255 255;
+  --primary: 14 116 144;
+  --primary-foreground: 255 255 255;
+  --secondary: 20 184 166;
+  --accent: 14 165 233;
+}
+
+.dark {
+  --background: 2 6 23;
+  --foreground: 248 250 252;
+  --muted: 15 23 42;
+  --muted-foreground: 148 163 184;
+  --border: 30 41 59;
+  --card: 15 23 42;
+  --primary: 45 212 191;
+  --primary-foreground: 15 23 42;
+  --secondary: 56 189 248;
+  --accent: 14 165 233;
+}
+
+@theme inline {
+  --color-background: rgb(var(--background));
+  --color-foreground: rgb(var(--foreground));
+  --color-muted: rgb(var(--muted));
+  --color-muted-foreground: rgb(var(--muted-foreground));
+  --color-border: rgb(var(--border));
+  --color-card: rgb(var(--card));
+  --color-primary: rgb(var(--primary));
+  --color-primary-foreground: rgb(var(--primary-foreground));
+  --color-secondary: rgb(var(--secondary));
+  --color-accent: rgb(var(--accent));
+}
+
+* {
+  border-color: rgb(var(--border));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  background-color: rgb(var(--background));
+  background-image:
+    linear-gradient(rgb(var(--background) / 0.78), rgb(var(--background) / 0.86)),
+    url("/images/sihu-background.jpg");
+  background-position: center top;
+  background-size: cover;
+  background-attachment: fixed;
+  color: rgb(var(--foreground));
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+.hero-image-glow {
+  background: radial-gradient(
+    ellipse at 78% 58%,
+    rgb(34 211 238 / 0.58) 0%,
+    rgb(14 165 233 / 0.28) 27%,
+    transparent 58%
+  );
+  mix-blend-mode: screen;
+  animation: lake-glow 6s ease-in-out infinite alternate;
+}
+
+@keyframes lake-glow {
+  from { opacity: 0.48; }
+  to { opacity: 0.92; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-image-glow { animation: none; opacity: 0.68; }
+}
+
+@media (max-width: 768px) {
+  body {
+    background-attachment: scroll;
+  }
+}

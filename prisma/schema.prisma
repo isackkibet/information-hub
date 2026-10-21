@@ -1,0 +1,200 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  REGISTERED_USER
+  CONTRIBUTOR
+  VERIFIER
+  EDITOR
+  LEADERSHIP
+  ADMINISTRATOR
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum ArticleStatus {
+  DRAFT
+  SUBMITTED
+  IN_REVIEW
+  CHANGES_REQUESTED
+  APPROVED
+  REJECTED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ReportStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  NEEDS_INFO
+  VERIFIED
+  REJECTED
+  CLOSED
+}
+
+enum TaskStatus {
+  ASSIGNED
+  IN_PROGRESS
+  DONE
+  BLOCKED
+}
+
+enum MediaType {
+  RADIO
+  PODCAST
+  VIDEO
+  NEWSPAPER
+}
+
+enum AuditAction {
+  USER_ROLE_CHANGED
+  USER_ACTIVATED
+  USER_DEACTIVATED
+  ARTICLE_CREATED
+  ARTICLE_EDITED
+  ARTICLE_SUBMITTED
+  ARTICLE_APPROVED
+  ARTICLE_REJECTED
+  ARTICLE_CHANGES_REQUESTED
+  CATEGORY_CREATED
+  CATEGORY_UPDATED
+  REPORT_SUBMITTED
+  REPORT_REVIEWED
+}
+
+model User {
+  id           String     @id @default(cuid())
+  name         String
+  email        String     @unique
+  passwordHash String?
+  role         Role       @default(REGISTERED_USER)
+  status       UserStatus @default(ACTIVE)
+  image        String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  lastActiveAt DateTime?
+
+  articles    Article[]     @relation("ArticleAuthor")
+  reports     Report[]      @relation("ReportSubmitter")
+  tasks       Task[]        @relation("TaskAssignee")
+  notifications Notification[]
+  auditEvents AuditEvent[]  @relation("AuditActor")
+}
+
+model Category {
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  name        String
+  description String     @default("")
+  enabled     Boolean    @default(true)
+  order       Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  articles Article[]
+  reports  Report[]
+  media    MediaItem[]
+}
+
+model Article {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  title       String
+  summary     String
+  content     String        @default("")
+  status      ArticleStatus @default(DRAFT)
+  image       String?
+  imageAlt    String?
+  location    String?
+  sourceUrl   String?
+  tags        String[]      @default([])
+  publishedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  authorId String?
+  author   User?   @relation("ArticleAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+}
+
+model Report {
+  id            String       @id @default(cuid())
+  title         String
+  description   String
+  location      String?
+  status        ReportStatus @default(SUBMITTED)
+  hasAttachment Boolean      @default(false)
+  notes         String?
+  submittedAt   DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  submittedById String?
+  submittedBy   User?   @relation("ReportSubmitter", fields: [submittedById], references: [id], onDelete: SetNull)
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  title       String
+  description String     @default("")
+  status      TaskStatus @default(ASSIGNED)
+  dueDate     DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  assigneeId String
+  assignee   User   @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: Cascade)
+
+  roleRequired Role?
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditEvent {
+  id          String      @id @default(cuid())
+  action      AuditAction
+  targetType  String
+  targetId    String
+  targetLabel String
+  details     String?
+  timestamp   DateTime    @default(now())
+
+  actorId String
+  actor   User   @relation("AuditActor", fields: [actorId], references: [id], onDelete: Cascade)
+}
+
+model MediaItem {
+  id          String    @id @default(cuid())
+  type        MediaType
+  title       String
+  description String    @default("")
+  image       String?
+  duration    String?
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+}
