@@ -47,7 +47,7 @@ function SignInRequired({ redirect }: { redirect: string }) {
   );
 }
 
-function AccessDenied({ requiredRole }: { requiredRole: string }) {
+function AccessDenied({ requiredRole, redirect }: { requiredRole: string; redirect?: string }) {
   return (
     <div className="container mx-auto flex min-h-[50vh] items-center justify-center px-4">
       <Card className="w-full max-w-md">
@@ -63,7 +63,7 @@ function AccessDenied({ requiredRole }: { requiredRole: string }) {
           <Link href="/account">
             <Button className="mt-4 w-full" variant="outline">Go to My Account</Button>
           </Link>
-          <Link href="/sign-in" className="mt-2 block text-sm text-muted-foreground hover:underline">
+          <Link href={redirect ? `/sign-in?redirect=${encodeURIComponent(redirect)}` : "/sign-in"} className="mt-2 block text-sm text-muted-foreground hover:underline">
             Switch account
           </Link>
         </CardContent>
@@ -98,7 +98,7 @@ export function AuthGuard({
 
   if (!checkAccess(session.user?.role, type)) {
     const roleLabel = type === "admin" ? "Administrator" : type === "editorial" ? "Editor" : type === "verification" ? "Verifier" : "Registered User";
-    return <AccessDenied requiredRole={requiredRole || roleLabel} />;
+    return <AccessDenied requiredRole={requiredRole || roleLabel} redirect={type === "admin" ? "/admin" : undefined} />;
   }
 
   return <>{children}</>;

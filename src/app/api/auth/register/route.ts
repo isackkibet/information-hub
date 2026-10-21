@@ -15,12 +15,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Name, email and password are required" }, { status: 400 });
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (name.length < 2 || name.length > 100) {
+      return NextResponse.json({ error: "Name must be between 2 and 100 characters" }, { status: 400 });
+    }
+
+    if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: "Enter a valid email address" }, { status: 400 });
     }
 
-    if (password.length < 8) {
-      return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
+    if (password.length < 8 || password.length > 72) {
+      return NextResponse.json({ error: "Password must be between 8 and 72 characters" }, { status: 400 });
     }
 
     const existing = await prisma.user.findUnique({ where: { email } });
@@ -43,6 +47,9 @@ export async function POST(req: Request) {
     );
   } catch (error) {
     console.error("Register error:", error);
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "P2002") {
+      return NextResponse.json({ error: "An account with this email already exists" }, { status: 409 });
+    }
     const message = error instanceof Error ? error.message : String(error);
     if (/P1001|Can't reach database server|DATABASE_URL is not set/.test(message)) {
       return NextResponse.json(

@@ -3,38 +3,47 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { articles, categories } from "@/data";
+import { getArticles, getCategories } from "@/backend/queries";
 import { FeaturedStories } from "@/components/articles/featured-stories";
 
-export default function HomePage() {
-  const featuredStories = articles.filter((a) => a.status === "published");
-  const cats = categories.filter((c) => c.enabled);
+export const instant = false;
+
+export default async function HomePage() {
+  const [articles, categories] = await Promise.all([
+    getArticles({ status: "published" }),
+    getCategories(true),
+  ]);
+
+  const featuredStories = articles;
+  const cats = categories;
 
   return (
     <div>
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
-          <Image
-            src="/images/featured-wetlands.jpg"
-            alt="A canoe travelling along a palm-lined waterway"
-            fill
-            className="object-cover"
-            sizes="100vw"
-            style={{ objectPosition: "center 72%" }}
-            preload
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-900/55 to-slate-900/20" />
-          <div
-            aria-hidden="true"
-            className="hero-image-glow pointer-events-none absolute inset-0"
-          />
+          <div className="relative h-full w-full">
+            <Image
+              src="/images/home-hero.jpg"
+              alt="Lake Victoria landscape"
+              fill
+              className="object-cover"
+              sizes="100vw"
+              style={{ objectPosition: "center 72%" }}
+              preload
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-900/55 to-slate-900/20" />
+            <div
+              aria-hidden="true"
+              className="hero-image-glow pointer-events-none absolute inset-0"
+            />
+          </div>
         </div>
         <div className="relative container mx-auto px-4 py-16 md:py-24">
           <div className="max-w-2xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-300">Sango Information Hub</p>
-            <h1 className="mt-4 text-4xl font-bold leading-tight tracking-tight text-white md:text-5xl">
-              We care about <span className="text-cyan-300 [text-shadow:0_0_24px_rgba(34,211,238,0.7)]">Lake Victoria.</span>
+            <p className="text-sm font-bold uppercase tracking-[0.24em] text-cyan-300">Sango Information Hub</p>
+            <h1 className="mt-4 text-4xl font-extrabold leading-tight tracking-tight text-white md:text-5xl">
+              We care about <span className="font-black text-cyan-300 [text-shadow:0_0_24px_rgba(34,211,238,0.7)]">Lake Victoria.</span>
             </h1>
             <p className="mt-4 max-w-xl text-base leading-7 text-white md:text-lg">
               A community media and knowledge-sharing platform serving the <strong className="font-semibold text-cyan-200">Lake Victoria Basin in Kenya</strong> —
@@ -88,7 +97,7 @@ export default function HomePage() {
               Sango Information Hub is a community media and knowledge-sharing initiative focused on Kenya’s Lake Victoria Basin. We document local knowledge, amplify community voices, and support informed conversations about the lake and people’s livelihoods.
             </p>
             <p className="mt-3 text-base leading-7 text-muted-foreground">
-              The platform is designed for community participation and accessible, responsible reporting. This demo shows the planned experience and does not claim verified impact.
+              The platform is designed for community participation and accessible, responsible reporting.
             </p>
           </div>
 
@@ -138,7 +147,7 @@ export default function HomePage() {
               <h3 className="text-lg font-semibold">Need to report or contribute?</h3>
               <p className="mt-2 text-muted-foreground">
                 Community members can submit reports for review. Contributors can prepare articles for editorial
-                review. Sign in (demo) to access role-based workspaces.
+                review. Sign in to access role-based workspaces.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Link href="/submit">
@@ -146,7 +155,7 @@ export default function HomePage() {
                 </Link>
                 <Link href="/sign-in">
                   <Button size="sm" variant="outline">
-                    Sign in (Demo)
+                    Sign in
                   </Button>
                 </Link>
               </div>

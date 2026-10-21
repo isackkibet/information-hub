@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { NextResponse } from "next/server";
 import { prisma } from "@/backend/database/prisma";
 import { extractToken, verifyToken } from "@/backend/auth/jwt";
@@ -27,7 +28,7 @@ export async function PATCH(req: Request) {
       user: { id: user.id, name: user.name, email: user.email, role: toRole(user.role) },
     });
   } catch (error) {
-    console.error("Profile update error:", error);
+    unstable_rethrow(error);
     return NextResponse.json({ error: "Unable to update profile" }, { status: 500 });
   }
 }

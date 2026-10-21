@@ -1,4 +1,5 @@
-import type { ArticleStatus, Category, Report, Article } from "@/types";
+import type { ArticleStatus as ArticleStatusEnum, ReportStatus as ReportStatusEnum } from "@/generated/prisma/enums";
+import type { ArticleStatus, Category, Report } from "@/types";
 
 export function toArticleStatus(value: string): ArticleStatus {
   const map: Record<string, ArticleStatus> = {
@@ -14,8 +15,8 @@ export function toArticleStatus(value: string): ArticleStatus {
   return map[value] ?? "draft";
 }
 
-export function fromArticleStatus(value: ArticleStatus) {
-  const map: Record<ArticleStatus, string> = {
+export function toDbArticleStatus(value: ArticleStatus): ArticleStatusEnum {
+  const map: Record<ArticleStatus, ArticleStatusEnum> = {
     draft: "DRAFT",
     submitted: "SUBMITTED",
     in_review: "IN_REVIEW",
@@ -40,8 +41,8 @@ export function toReportStatus(value: string) {
   return map[value] ?? "submitted";
 }
 
-export function fromReportStatus(value: Report["status"]) {
-  const map: Record<Report["status"], string> = {
+export function toDbReportStatus(value: Report["status"]): ReportStatusEnum {
+  const map: Record<Report["status"], ReportStatusEnum> = {
     submitted: "SUBMITTED",
     under_review: "UNDER_REVIEW",
     needs_info: "NEEDS_INFO",

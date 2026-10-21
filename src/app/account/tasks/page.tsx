@@ -1,20 +1,56 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { tasks } from "@/data";
+import { taskService } from "@/frontend/services";
+import type { Task } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate } from "@/lib/utils";
 import { useSession } from "@/hooks/use-session";
 import { getNavForRole } from "@/lib/permissions";
-import { Calendar, User, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { Calendar, User, CheckCircle } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 
 export default function TasksPage() {
   const { toast } = useToast();
   const { session, loading } = useSession();
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [busyTaskId, setBusyTaskId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!session.isAuthenticated) return;
+
+    let active = true;
+    taskService
+      .list()
+      .then((data) => {
+        if (active) setTasks(data);
+      })
+      .catch(() => {
+        if (active) setTasks([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [session.isAuthenticated]);
+
+  const updateStatus = async (task: Task, status: string, message: string) => {
+    setBusyTaskId(task.id);
+    try {
+      await taskService.updateStatus(task.id, status);
+      setTasks((current) =>
+        current.map((t) => (t.id === task.id ? { ...t, status: status as Task["status"] } : t))
+      );
+      toast(message, "success");
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Unable to update the task", "error");
+    } finally {
+      setBusyTaskId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -37,20 +73,7 @@ export default function TasksPage() {
   }
 
   const nav = getNavForRole(session.user?.role);
-  // Show tasks relevant to the user's role
-  const myTasks = tasks.filter((t) => {
-    if (!session.user) return false;
-    // Admin sees all, others see tasks matching their role or assigned to them
-    if (session.user.role === "Administrator") return true;
-    return t.assigneeId === session.user.id || t.roleRequired === session.user.role;
-  });
-
-  const _statusIcon: Record<string, React.ReactNode> = {
-    assigned: <Clock className="h-4 w-4 text-blue-600" />,
-    in_progress: <Clock className="h-4 w-4 text-indigo-600" />,
-    done: <CheckCircle className="h-4 w-4 text-emerald-600" />,
-    blocked: <AlertCircle className="h-4 w-4 text-rose-600" />,
-  };
+  const myTasks = tasks;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -96,7 +119,8 @@ export default function TasksPage() {
                     {t.status === "assigned" && (
                       <Button
                         size="sm"
-                        onClick={() => toast("Task started", "success")}
+                        disabled={busyTaskId === t.id}
+                        onClick={() => updateStatus(t, "in_progress", "Task started")}
                       >
                         Start task
                       </Button>
@@ -104,7 +128,8 @@ export default function TasksPage() {
                     {t.status === "in_progress" && (
                       <Button
                         size="sm"
-                        onClick={() => toast("Task marked complete", "success")}
+                        disabled={busyTaskId === t.id}
+                        onClick={() => updateStatus(t, "done", "Task marked complete")}
                       >
                         Mark complete
                       </Button>
@@ -113,7 +138,8 @@ export default function TasksPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => toast("Requesting unblock", "info")}
+                        disabled={busyTaskId === t.id}
+                        onClick={() => updateStatus(t, "in_progress", "Task moved back to in progress")}
                       >
                         Request unblock
                       </Button>

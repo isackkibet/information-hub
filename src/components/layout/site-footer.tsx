@@ -22,6 +22,7 @@ export function SiteFooter() {
           <ul className="mt-3 space-y-2.5 text-sm text-muted-foreground">
             <li><Link href="/" className="transition-colors hover:text-foreground">Home</Link></li>
             <li><Link href="/portal" className="transition-colors hover:text-foreground">Community portal</Link></li>
+            <li><Link href="/portal/media" className="transition-colors hover:text-foreground">Media Content</Link></li>
             <li><Link href="/ai-assistant" className="transition-colors hover:text-foreground">AI assistant</Link></li>
           </ul>
         </div>

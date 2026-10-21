@@ -30,7 +30,9 @@ export type MediaItemMinAggregateOutputType = {
   title: string | null
   description: string | null
   image: string | null
+  mediaUrl: string | null
   duration: string | null
+  isPublished: boolean | null
   publishedAt: Date | null
   createdAt: Date | null
   categoryId: string | null
@@ -42,7 +44,9 @@ export type MediaItemMaxAggregateOutputType = {
   title: string | null
   description: string | null
   image: string | null
+  mediaUrl: string | null
   duration: string | null
+  isPublished: boolean | null
   publishedAt: Date | null
   createdAt: Date | null
   categoryId: string | null
@@ -54,7 +58,9 @@ export type MediaItemCountAggregateOutputType = {
   title: number
   description: number
   image: number
+  mediaUrl: number
   duration: number
+  isPublished: number
   publishedAt: number
   createdAt: number
   categoryId: number
@@ -68,7 +74,9 @@ export type MediaItemMinAggregateInputType = {
   title?: true
   description?: true
   image?: true
+  mediaUrl?: true
   duration?: true
+  isPublished?: true
   publishedAt?: true
   createdAt?: true
   categoryId?: true
@@ -80,7 +88,9 @@ export type MediaItemMaxAggregateInputType = {
   title?: true
   description?: true
   image?: true
+  mediaUrl?: true
   duration?: true
+  isPublished?: true
   publishedAt?: true
   createdAt?: true
   categoryId?: true
@@ -92,7 +102,9 @@ export type MediaItemCountAggregateInputType = {
   title?: true
   description?: true
   image?: true
+  mediaUrl?: true
   duration?: true
+  isPublished?: true
   publishedAt?: true
   createdAt?: true
   categoryId?: true
@@ -177,7 +189,9 @@ export type MediaItemGroupByOutputType = {
   title: string
   description: string
   image: string | null
+  mediaUrl: string | null
   duration: string | null
+  isPublished: boolean
   publishedAt: Date | null
   createdAt: Date
   categoryId: string | null
@@ -210,7 +224,9 @@ export type MediaItemWhereInput = {
   title?: Prisma.StringFilter<"MediaItem"> | string
   description?: Prisma.StringFilter<"MediaItem"> | string
   image?: Prisma.StringNullableFilter<"MediaItem"> | string | null
+  mediaUrl?: Prisma.StringNullableFilter<"MediaItem"> | string | null
   duration?: Prisma.StringNullableFilter<"MediaItem"> | string | null
+  isPublished?: Prisma.BoolFilter<"MediaItem"> | boolean
   publishedAt?: Prisma.DateTimeNullableFilter<"MediaItem"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"MediaItem"> | Date | string
   categoryId?: Prisma.StringNullableFilter<"MediaItem"> | string | null
@@ -223,7 +239,9 @@ export type MediaItemOrderByWithRelationInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   image?: Prisma.SortOrderInput | Prisma.SortOrder
+  mediaUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   duration?: Prisma.SortOrderInput | Prisma.SortOrder
+  isPublished?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -239,7 +257,9 @@ export type MediaItemWhereUniqueInput = Prisma.AtLeast<{
   title?: Prisma.StringFilter<"MediaItem"> | string
   description?: Prisma.StringFilter<"MediaItem"> | string
   image?: Prisma.StringNullableFilter<"MediaItem"> | string | null
+  mediaUrl?: Prisma.StringNullableFilter<"MediaItem"> | string | null
   duration?: Prisma.StringNullableFilter<"MediaItem"> | string | null
+  isPublished?: Prisma.BoolFilter<"MediaItem"> | boolean
   publishedAt?: Prisma.DateTimeNullableFilter<"MediaItem"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"MediaItem"> | Date | string
   categoryId?: Prisma.StringNullableFilter<"MediaItem"> | string | null
@@ -252,7 +272,9 @@ export type MediaItemOrderByWithAggregationInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   image?: Prisma.SortOrderInput | Prisma.SortOrder
+  mediaUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   duration?: Prisma.SortOrderInput | Prisma.SortOrder
+  isPublished?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -270,7 +292,9 @@ export type MediaItemScalarWhereWithAggregatesInput = {
   title?: Prisma.StringWithAggregatesFilter<"MediaItem"> | string
   description?: Prisma.StringWithAggregatesFilter<"MediaItem"> | string
   image?: Prisma.StringNullableWithAggregatesFilter<"MediaItem"> | string | null
+  mediaUrl?: Prisma.StringNullableWithAggregatesFilter<"MediaItem"> | string | null
   duration?: Prisma.StringNullableWithAggregatesFilter<"MediaItem"> | string | null
+  isPublished?: Prisma.BoolWithAggregatesFilter<"MediaItem"> | boolean
   publishedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"MediaItem"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"MediaItem"> | Date | string
   categoryId?: Prisma.StringNullableWithAggregatesFilter<"MediaItem"> | string | null
@@ -282,7 +306,9 @@ export type MediaItemCreateInput = {
   title: string
   description?: string
   image?: string | null
+  mediaUrl?: string | null
   duration?: string | null
+  isPublished?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
   category?: Prisma.CategoryCreateNestedOneWithoutMediaInput
@@ -294,7 +320,9 @@ export type MediaItemUncheckedCreateInput = {
   title: string
   description?: string
   image?: string | null
+  mediaUrl?: string | null
   duration?: string | null
+  isPublished?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
   categoryId?: string | null
@@ -306,7 +334,9 @@ export type MediaItemUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   category?: Prisma.CategoryUpdateOneWithoutMediaNestedInput
@@ -318,7 +348,9 @@ export type MediaItemUncheckedUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -330,7 +362,9 @@ export type MediaItemCreateManyInput = {
   title: string
   description?: string
   image?: string | null
+  mediaUrl?: string | null
   duration?: string | null
+  isPublished?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
   categoryId?: string | null
@@ -342,7 +376,9 @@ export type MediaItemUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -353,7 +389,9 @@ export type MediaItemUncheckedUpdateManyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -375,7 +413,9 @@ export type MediaItemCountOrderByAggregateInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   image?: Prisma.SortOrder
+  mediaUrl?: Prisma.SortOrder
   duration?: Prisma.SortOrder
+  isPublished?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
@@ -387,7 +427,9 @@ export type MediaItemMaxOrderByAggregateInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   image?: Prisma.SortOrder
+  mediaUrl?: Prisma.SortOrder
   duration?: Prisma.SortOrder
+  isPublished?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
@@ -399,7 +441,9 @@ export type MediaItemMinOrderByAggregateInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   image?: Prisma.SortOrder
+  mediaUrl?: Prisma.SortOrder
   duration?: Prisma.SortOrder
+  isPublished?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
@@ -457,7 +501,9 @@ export type MediaItemCreateWithoutCategoryInput = {
   title: string
   description?: string
   image?: string | null
+  mediaUrl?: string | null
   duration?: string | null
+  isPublished?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
 }
@@ -468,7 +514,9 @@ export type MediaItemUncheckedCreateWithoutCategoryInput = {
   title: string
   description?: string
   image?: string | null
+  mediaUrl?: string | null
   duration?: string | null
+  isPublished?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
 }
@@ -508,7 +556,9 @@ export type MediaItemScalarWhereInput = {
   title?: Prisma.StringFilter<"MediaItem"> | string
   description?: Prisma.StringFilter<"MediaItem"> | string
   image?: Prisma.StringNullableFilter<"MediaItem"> | string | null
+  mediaUrl?: Prisma.StringNullableFilter<"MediaItem"> | string | null
   duration?: Prisma.StringNullableFilter<"MediaItem"> | string | null
+  isPublished?: Prisma.BoolFilter<"MediaItem"> | boolean
   publishedAt?: Prisma.DateTimeNullableFilter<"MediaItem"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"MediaItem"> | Date | string
   categoryId?: Prisma.StringNullableFilter<"MediaItem"> | string | null
@@ -520,7 +570,9 @@ export type MediaItemCreateManyCategoryInput = {
   title: string
   description?: string
   image?: string | null
+  mediaUrl?: string | null
   duration?: string | null
+  isPublished?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
 }
@@ -531,7 +583,9 @@ export type MediaItemUpdateWithoutCategoryInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -542,7 +596,9 @@ export type MediaItemUncheckedUpdateWithoutCategoryInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -553,7 +609,9 @@ export type MediaItemUncheckedUpdateManyWithoutCategoryInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -566,7 +624,9 @@ export type MediaItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   title?: boolean
   description?: boolean
   image?: boolean
+  mediaUrl?: boolean
   duration?: boolean
+  isPublished?: boolean
   publishedAt?: boolean
   createdAt?: boolean
   categoryId?: boolean
@@ -579,7 +639,9 @@ export type MediaItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   title?: boolean
   description?: boolean
   image?: boolean
+  mediaUrl?: boolean
   duration?: boolean
+  isPublished?: boolean
   publishedAt?: boolean
   createdAt?: boolean
   categoryId?: boolean
@@ -592,7 +654,9 @@ export type MediaItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   title?: boolean
   description?: boolean
   image?: boolean
+  mediaUrl?: boolean
   duration?: boolean
+  isPublished?: boolean
   publishedAt?: boolean
   createdAt?: boolean
   categoryId?: boolean
@@ -605,13 +669,15 @@ export type MediaItemSelectScalar = {
   title?: boolean
   description?: boolean
   image?: boolean
+  mediaUrl?: boolean
   duration?: boolean
+  isPublished?: boolean
   publishedAt?: boolean
   createdAt?: boolean
   categoryId?: boolean
 }
 
-export type MediaItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "type" | "title" | "description" | "image" | "duration" | "publishedAt" | "createdAt" | "categoryId", ExtArgs["result"]["mediaItem"]>
+export type MediaItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "type" | "title" | "description" | "image" | "mediaUrl" | "duration" | "isPublished" | "publishedAt" | "createdAt" | "categoryId", ExtArgs["result"]["mediaItem"]>
 export type MediaItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   category?: boolean | Prisma.MediaItem$categoryArgs<ExtArgs>
 }
@@ -633,7 +699,9 @@ export type $MediaItemPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     title: string
     description: string
     image: string | null
+    mediaUrl: string | null
     duration: string | null
+    isPublished: boolean
     publishedAt: Date | null
     createdAt: Date
     categoryId: string | null
@@ -1066,7 +1134,9 @@ export interface MediaItemFieldRefs {
   readonly title: Prisma.FieldRef<"MediaItem", 'String'>
   readonly description: Prisma.FieldRef<"MediaItem", 'String'>
   readonly image: Prisma.FieldRef<"MediaItem", 'String'>
+  readonly mediaUrl: Prisma.FieldRef<"MediaItem", 'String'>
   readonly duration: Prisma.FieldRef<"MediaItem", 'String'>
+  readonly isPublished: Prisma.FieldRef<"MediaItem", 'Boolean'>
   readonly publishedAt: Prisma.FieldRef<"MediaItem", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"MediaItem", 'DateTime'>
   readonly categoryId: Prisma.FieldRef<"MediaItem", 'String'>

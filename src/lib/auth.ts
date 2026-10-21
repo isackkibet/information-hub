@@ -15,6 +15,7 @@ export interface AuthSession {
 const TOKEN_KEY = "sihu_token";
 const USER_KEY = "sihu_user";
 const AUTH_EVENT = "sihu-auth-change";
+let sessionCheckInFlight: Promise<AuthSession> | null = null;
 
 export function getStoredToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -51,10 +52,6 @@ export function clearSession() {
   localStorage.removeItem(USER_KEY);
   notifySessionChanged();
 }
-
-// Shared client layouts and route guards still use these older helper names.
-export const getDemoSession = getSession;
-export const clearDemoSession = clearSession;
 
 export function onSessionChanged(handler: () => void): () => void {
   if (typeof window === "undefined") return () => {};
@@ -103,21 +100,32 @@ export async function fetchSession(): Promise<AuthSession> {
   const token = getStoredToken();
   if (!token) return { user: null, isAuthenticated: false };
 
-  try {
-    const res = await fetch("/api/auth/me", {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
-    });
+  // The header and protected page can mount together; share their validation request.
+  if (sessionCheckInFlight) return sessionCheckInFlight;
 
-    if (!res.ok) {
-      clearSession();
-      return { user: null, isAuthenticated: false };
+  sessionCheckInFlight = (async () => {
+    try {
+      const res = await fetch("/api/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      });
+
+      if (!res.ok) {
+        clearSession();
+        return { user: null, isAuthenticated: false };
+      }
+
+      const data = await res.json();
+      localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+      return { user: data.user, isAuthenticated: true };
+    } catch {
+      return getSession();
     }
+  })();
 
-    const data = await res.json();
-    localStorage.setItem(USER_KEY, JSON.stringify(data.user));
-    return { user: data.user, isAuthenticated: true };
-  } catch {
-    return getSession();
+  try {
+    return await sessionCheckInFlight;
+  } finally {
+    sessionCheckInFlight = null;
   }
 }

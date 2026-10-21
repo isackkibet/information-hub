@@ -4,18 +4,27 @@ import { Search, Radio, Mic, Video, Newspaper, FileText, ArrowRight } from "luci
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { articles, categories, mediaItems } from "@/data";
+import { getArticles, getCategories, getMediaItems, getReports } from "@/backend/queries";
 import { formatDate } from "@/lib/utils";
 import { TopicCard } from "@/components/portal/topic-card";
 import { ArticleCard } from "@/components/articles/article-card";
 import { AuthGuard } from "@/components/layout/auth-guard";
 
-export default function PortalPage() {
-  const published = articles.filter((a) => a.status === "published");
-  const latest = published.slice(0, 4);
+export const instant = false;
+
+export default async function PortalPage() {
+  const [published, allCategories, allMedia, reports] = await Promise.all([
+    getArticles({ status: "published", limit: 4 }),
+    getCategories(true),
+    getMediaItems(4),
+    getReports({ status: "verified", limit: 6 }),
+  ]);
+
+  const latest = published;
   const featured = published[0];
-  const cats = categories.filter((c) => c.enabled);
-  const media = mediaItems.slice(0, 4);
+  const cats = allCategories;
+  const media = allMedia;
+  const publishedReports = reports;
 
   return (
     <AuthGuard type="auth">
@@ -61,6 +70,7 @@ export default function PortalPage() {
                       src={featured.image}
                       alt={featured.imageAlt || featured.title}
                       fill
+                      unoptimized
                       className="object-cover"
                     />
                   </div>
@@ -124,7 +134,7 @@ export default function PortalPage() {
                 <Card className="overflow-hidden transition hover:shadow-md">
                   {m.image && (
                     <div className="relative h-36 w-full">
-                      <Image src={m.image} alt={m.title} fill className="object-cover" />
+                      <Image src={m.image} alt={m.title} fill unoptimized className="object-cover" />
                     </div>
                   )}
                   <CardContent className="p-4">
@@ -146,20 +156,38 @@ export default function PortalPage() {
         </section>
 
         <section className="mt-10">
-          <h2 className="text-xl font-semibold">Approved community reports (Demo)</h2>
+          <h2 className="text-xl font-semibold">Verified community reports</h2>
           <p className="text-sm text-muted-foreground">
-            Community reports appear here when marked approved in the workflow (demo data only).
+            Community reports appear here once a verifier has checked them.
           </p>
-          <Card className="mt-4">
-            <CardContent className="flex items-center gap-3 p-4 text-sm text-muted-foreground">
-              <FileText className="h-4 w-4" />
-              No approved community reports are marked as published in the current demo set. Use{" "}
-              <Link href="/submit" className="text-primary hover:underline">
-                Submit a Report
-              </Link>{" "}
-              to see the reporting flow.
-            </CardContent>
-          </Card>
+          {publishedReports.length > 0 ? (
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {publishedReports.map((report) => (
+                <Card key={report.id}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <FileText className="h-3 w-3" />
+                      <span>{report.categoryName}</span>
+                      {report.location && <span>• {report.location}</span>}
+                    </div>
+                    <p className="mt-1 font-medium">{report.title}</p>
+                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{report.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="mt-4">
+              <CardContent className="flex items-center gap-3 p-4 text-sm text-muted-foreground">
+                <FileText className="h-4 w-4" />
+                No verified community reports yet. Use{" "}
+                <Link href="/submit" className="text-primary hover:underline">
+                  Submit a Report
+                </Link>{" "}
+                to send one for verification.
+              </CardContent>
+            </Card>
+          )}
         </section>
       </div>
     </AuthGuard>

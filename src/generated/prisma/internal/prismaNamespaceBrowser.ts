@@ -58,7 +58,8 @@ export const ModelName = {
   Task: 'Task',
   Notification: 'Notification',
   AuditEvent: 'AuditEvent',
-  MediaItem: 'MediaItem'
+  MediaItem: 'MediaItem',
+  SiteSetting: 'SiteSetting'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -136,6 +137,7 @@ export const ReportScalarFieldEnum = {
   location: 'location',
   status: 'status',
   hasAttachment: 'hasAttachment',
+  attachmentUrl: 'attachmentUrl',
   notes: 'notes',
   submittedAt: 'submittedAt',
   updatedAt: 'updatedAt',
@@ -193,13 +195,24 @@ export const MediaItemScalarFieldEnum = {
   title: 'title',
   description: 'description',
   image: 'image',
+  mediaUrl: 'mediaUrl',
   duration: 'duration',
+  isPublished: 'isPublished',
   publishedAt: 'publishedAt',
   createdAt: 'createdAt',
   categoryId: 'categoryId'
 } as const
 
 export type MediaItemScalarFieldEnum = (typeof MediaItemScalarFieldEnum)[keyof typeof MediaItemScalarFieldEnum]
+
+
+export const SiteSettingScalarFieldEnum = {
+  key: 'key',
+  value: 'value',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SiteSettingScalarFieldEnum = (typeof SiteSettingScalarFieldEnum)[keyof typeof SiteSettingScalarFieldEnum]
 
 
 export const SortOrder = {

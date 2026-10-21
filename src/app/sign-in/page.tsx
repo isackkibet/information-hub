@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,6 +12,17 @@ import { useToast } from "@/components/ui/toast";
 import { LogIn, UserPlus } from "lucide-react";
 
 type Mode = "signin" | "signup";
+
+function getInternalRedirect(value: string | null): string {
+  if (!value) return "/account";
+  try {
+    const target = new URL(value, "https://sihu.invalid");
+    if (target.origin !== "https://sihu.invalid") return "/account";
+    return `${target.pathname}${target.search}${target.hash}`;
+  } catch {
+    return "/account";
+  }
+}
 
 function SignInContent() {
   const router = useRouter();
@@ -23,20 +35,22 @@ function SignInContent() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const redirectTo = sp.get("redirect") || "/account";
+  const redirectTo = getInternalRedirect(sp.get("redirect"));
+  const requestedRedirect = sp.get("redirect");
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       if (mode === "signin") {
-        await login(email.trim(), password);
+        const user = await login(email.trim(), password);
         toast("Signed in successfully", "success");
+        router.push(requestedRedirect ? redirectTo : user.role === "Administrator" ? "/admin" : redirectTo);
       } else {
         await register(name.trim(), email.trim(), password);
         toast("Account created", "success");
+        router.push(redirectTo);
       }
-      router.push(redirectTo);
     } catch (err) {
       toast(err instanceof Error ? err.message : "Something went wrong", "error");
     } finally {
@@ -120,6 +134,7 @@ function SignInContent() {
                 placeholder={mode === "signup" ? "At least 8 characters" : "Enter your password"}
                 autoComplete={mode === "signup" ? "new-password" : "current-password"}
                 minLength={mode === "signup" ? 8 : undefined}
+                maxLength={72}
                 required
               />
             </div>
@@ -130,8 +145,15 @@ function SignInContent() {
           </form>
 
           <p className="mt-4 text-xs text-muted-foreground">
-            New accounts start as Registered Users. An administrator can upgrade your role later.
+            Sign in with the email and password for your account. New sign-ups become Registered Users; admin accounts are provisioned by the site owner.
           </p>
+          <div className="mt-4 border-t border-border pt-4">
+            <p className="text-sm font-medium">Administrator?</p>
+            <p className="mt-1 text-xs text-muted-foreground">Use the same sign-in form with your administrator account.</p>
+            <Link href="/sign-in?redirect=%2Fadmin" className="mt-3 inline-flex h-9 w-full items-center justify-center rounded-md border border-border px-3 text-sm font-medium transition-colors hover:bg-muted">
+              Admin Portal sign in
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>

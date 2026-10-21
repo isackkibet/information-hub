@@ -57,3 +57,8 @@ export type AuditEvent = Prisma.AuditEventModel
  * 
  */
 export type MediaItem = Prisma.MediaItemModel
+/**
+ * Model SiteSetting
+ * 
+ */
+export type SiteSetting = Prisma.SiteSettingModel

@@ -4,11 +4,12 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { articles } from "@/data";
+import { contentApi } from "@/frontend/services";
+import type { Article } from "@/types";
 import { useSession } from "@/hooks/use-session";
 import { ArticleCard } from "@/components/articles/article-card";
 import { useToast } from "@/components/ui/toast";
-import { Bookmark, Trash2, BookmarkX } from "lucide-react";
+import { Trash2, BookmarkX } from "lucide-react";
 
 const STORAGE_KEY = "sihu_library";
 
@@ -28,35 +29,10 @@ function setSavedSlugs(slugs: string[]) {
   window.dispatchEvent(new Event("storage"));
 }
 
-export function useSavedArticles() {
-  const [saved, setSaved] = useState<string[]>(() => {
-    if (typeof window === "undefined") return [];
-    return getSavedSlugs();
-  });
-
-  useEffect(() => {
-    const handler = () => setSaved(getSavedSlugs());
-    window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
-  }, []);
-
-  const toggleSave = (slug: string) => {
-    const current = getSavedSlugs();
-    if (current.includes(slug)) {
-      setSavedSlugs(current.filter((s) => s !== slug));
-      setSaved(current.filter((s) => s !== slug));
-    } else {
-      setSavedSlugs([...current, slug]);
-      setSaved([...current, slug]);
-    }
-  };
-
-  return { saved, toggleSave };
-}
-
 export default function LibraryPage() {
   const { toast } = useToast();
   const { session, loading } = useSession();
+  const [articles, setArticles] = useState<Article[]>([]);
   const [saved, setSaved] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];
     return getSavedSlugs();
@@ -67,6 +43,24 @@ export default function LibraryPage() {
     window.addEventListener("storage", handler);
     return () => window.removeEventListener("storage", handler);
   }, []);
+
+  useEffect(() => {
+    if (!session.isAuthenticated) return;
+
+    let active = true;
+    contentApi
+      .getArticles()
+      .then((data) => {
+        if (active) setArticles(data);
+      })
+      .catch(() => {
+        if (active) setArticles([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [session.isAuthenticated]);
 
   if (loading) {
     return (
@@ -103,7 +97,7 @@ export default function LibraryPage() {
         <div>
           <h1 className="text-2xl font-semibold">My Library</h1>
           <p className="text-muted-foreground">
-            Saved articles and resources. Saved locally.
+            Saved articles and resources.
           </p>
         </div>
         {savedArticles.length > 0 && (

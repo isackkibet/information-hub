@@ -20,16 +20,19 @@ export function useSession() {
     let active = true;
 
     (async () => {
-      const tokenPresent = getSession().isAuthenticated;
-      if (!tokenPresent) {
+      const localSession = getSession();
+      if (!localSession.isAuthenticated) {
         setSession(EMPTY);
         setLoading(false);
         return;
       }
+      // The login flow has just stored this user locally. Render the signed-in
+      // shell immediately while checking the token and account status in the background.
+      setSession(localSession);
+      setLoading(false);
       const next = await fetchSession();
       if (active) {
         setSession(next);
-        setLoading(false);
       }
     })();
 

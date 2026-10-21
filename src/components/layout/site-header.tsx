@@ -39,13 +39,15 @@ function HeaderInner() {
   };
 
   const nav = getNavForRole(session.user?.role);
+  const adminHref = session.isAuthenticated ? "/admin" : "/sign-in?redirect=%2Fadmin";
 
   const links = [
     { href: "/", label: "Home" },
+    { href: "/portal/media", label: "Media Content" },
     { href: "/portal", label: "Portal" },
     { href: "/ai-assistant", label: "AI Assistant" },
     { href: "/submit", label: "Submit a Report" },
-    nav.showAdmin ? { href: "/admin", label: "Admin Portal" } : null,
+    { href: adminHref, label: "Admin Portal" },
   ].filter(Boolean) as { href: string; label: string }[];
 
   const workspaceLinks = [

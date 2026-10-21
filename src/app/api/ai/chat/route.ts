@@ -1,6 +1,7 @@
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
 type ChatContext = { articleTitle?: string; articleHref?: string };
+type PublishedArticle = { title: string; slug: string; summary: string; content: string };
 
 const MAX_MESSAGES = 20;
 const MAX_MESSAGE_LENGTH = 8_000;
@@ -11,10 +12,10 @@ function jsonError(message: string, status: number) {
 }
 
 export async function POST(request: Request) {
-  const apiKey = process.env.XAI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return jsonError(
-      "Grok is not configured. Add XAI_API_KEY to .env.local and restart the dev server.",
+      "The AI assistant is not configured. Add GROQ_API_KEY to .env and restart the dev server.",
       503
     );
   }
@@ -63,65 +64,98 @@ export async function POST(request: Request) {
     if (articleTitle) context = { articleTitle, articleHref };
   }
 
+  let sourceArticles: PublishedArticle[] = [];
+  try {
+    const { getArticleBySlug, searchAssistantArticles } = await import("@/backend/queries");
+    const recentQuestions = messages
+      .filter((message) => message.role === "user")
+      .slice(-2)
+      .map((message) => message.content)
+      .join(" ")
+      .slice(-1_000);
+    sourceArticles = await searchAssistantArticles(recentQuestions);
+
+    const contextSlug = context?.articleHref?.match(/^\/portal\/articles\/([a-z0-9-]+)\/?$/i)?.[1];
+    if (contextSlug) {
+      const contextualArticle = await getArticleBySlug(contextSlug);
+      if (contextualArticle?.status === "published") {
+        sourceArticles = [
+          {
+            title: contextualArticle.title,
+            slug: contextualArticle.slug,
+            summary: contextualArticle.summary,
+            content: contextualArticle.content.slice(0, 1_800),
+          },
+          ...sourceArticles.filter((article) => article.slug !== contextualArticle.slug),
+        ].slice(0, 4);
+      }
+    }
+  } catch {
+    // Keep general chat available if article search is temporarily unavailable.
+  }
+
+  const articleEvidence = sourceArticles.length
+    ? sourceArticles.map((article, index) =>
+        `[${index + 1}] ${article.title}\nSummary: ${article.summary}\nArticle text: ${article.content}`
+      ).join("\n\n")
+    : "No matching published SIHU articles were found for this turn.";
+
   const systemPrompt = [
     "You are the SIHU AI Assistant for the Sango Information Hub, a community information project serving Kenya's Lake Victoria Basin.",
-    "Be clear, useful, and respectful. Keep answers focused. Do not claim to have searched SIHU's article database or live news unless that information is present in the conversation.",
-    "Do not invent facts, article details, quotations, or sources. If you are uncertain or the user asks for information that needs current verification, say so plainly.",
+    "Be clear, useful, and respectful. Keep answers focused. Use the published SIHU article material below when it helps answer the user's question or summarize an article.",
+    "Do not invent SIHU article facts, quotations, or sources, or infer causes and outcomes beyond what an article says. If the supplied articles do not answer the question, say so and distinguish general background from SIHU reporting. Cite relevant article titles in your answer.",
     "You may help explain topics, summarize text the user provides, and discuss Lake Victoria community issues. You cannot approve articles, verify reports, publish content, or make account changes.",
-    context ? `The user opened this SIHU article: ${context.articleTitle}. Only its title and link are available; do not imply that you have read its full contents.` : "",
+    `Published SIHU articles retrieved for this question:\n${articleEvidence}`,
+    context && !sourceArticles.some((article) => `/portal/articles/${article.slug}` === context.articleHref)
+      ? `The user opened an article titled ${context.articleTitle}, but its published text was not available. Do not infer its contents.`
+      : "",
   ].filter(Boolean).join("\n");
 
   let upstream: Response;
   try {
-    upstream = await fetch("https://api.x.ai/v1/responses", {
+    upstream = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: process.env.XAI_MODEL || "grok-4.7",
-        input: [{ role: "system", content: systemPrompt }, ...messages],
-        max_output_tokens: 1_200,
-        store: false,
+        model: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
+        messages: [{ role: "system", content: systemPrompt }, ...messages],
+        max_completion_tokens: 1_200,
       }),
       cache: "no-store",
       signal: AbortSignal.timeout(60_000),
     });
   } catch {
-    return jsonError("Could not reach Grok. Check your connection and try again.", 502);
+    return jsonError("Could not reach the AI service. Check your connection and try again.", 502);
   }
 
   if (!upstream.ok) {
     return jsonError(
       upstream.status === 401 || upstream.status === 403
-        ? "Grok rejected the API key. Check XAI_API_KEY in .env.local."
-        : `Grok could not complete the request (HTTP ${upstream.status}). Try again shortly.`,
+        ? "Groq rejected the API key. Check GROQ_API_KEY in .env."
+        : `The AI service could not complete the request (HTTP ${upstream.status}). Try again shortly.`,
       502
     );
   }
 
   let response: {
-    output?: Array<{ type?: string; content?: Array<{ type?: string; text?: string }> }>;
+    choices?: Array<{ message?: { content?: string | null } }>;
   };
   try {
     response = await upstream.json();
   } catch {
-    return jsonError("Grok returned an unreadable response. Please try again.", 502);
+    return jsonError("The AI service returned an unreadable response. Please try again.", 502);
   }
 
-  const reply = response?.output
-    ?.filter((item) => item.type === "message")
-    .flatMap((item) => item.content || [])
-    .filter((item) => item.type === "output_text" && typeof item.text === "string")
-    .map((item) => item.text)
-    .join("\n")
-    .trim();
+  const reply = response.choices?.[0]?.message?.content?.trim();
 
-  if (!reply) return jsonError("Grok returned an empty response. Please try again.", 502);
+  if (!reply) return jsonError("The AI service returned an empty response. Please try again.", 502);
 
-  const sources = context?.articleTitle && context.articleHref
-    ? [{ label: context.articleTitle, href: context.articleHref }]
-    : [];
+  const sources = sourceArticles.map((article) => ({
+    label: article.title,
+    href: `/portal/articles/${article.slug}`,
+  }));
   return Response.json({ reply, sources });
 }

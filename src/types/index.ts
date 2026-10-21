@@ -60,6 +60,7 @@ export interface Report {
   submittedById?: string;
   submittedByName?: string;
   hasAttachment: boolean;
+  attachmentUrl?: string;
   notes?: string;
 }
 
@@ -114,11 +115,14 @@ export interface AuditEvent {
 
 export interface MediaItem {
   id: string;
-  type: "radio" | "podcast" | "video" | "newspaper";
+  type: "radio" | "podcast" | "video" | "newspaper" | "image";
   title: string;
   description: string;
   image?: string;
+  mediaUrl?: string;
   duration?: string;
   publishedAt: string;
   category?: string;
+  categoryId?: string;
+  isPublished: boolean;
 }

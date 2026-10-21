@@ -1,13 +1,18 @@
 import { notFound } from "next/navigation";
-import { categories, articles } from "@/data";
+import { getArticles, getCategories } from "@/backend/queries";
 import { ArticleCard } from "@/components/articles/article-card";
 import { AuthGuard } from "@/components/layout/auth-guard";
 
+export const instant = false;
+
 export default async function TopicPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const cat = categories.find((c) => c.slug === slug && c.enabled);
+
+  const categories = await getCategories(true);
+  const cat = categories.find((c) => c.slug === slug);
   if (!cat) notFound();
-  const list = articles.filter((a) => a.categorySlug === slug && a.status === "published");
+
+  const list = await getArticles({ categorySlug: slug, status: "published" });
 
   return (
     <AuthGuard type="auth">
@@ -22,7 +27,7 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
           ))}
         </div>
         {list.length === 0 && (
-          <p className="mt-6 text-muted-foreground">No published articles in this topic yet (demo).</p>
+          <p className="mt-6 text-muted-foreground">No published articles in this topic yet.</p>
         )}
       </div>
     </AuthGuard>

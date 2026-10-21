@@ -17,6 +17,8 @@ export function ArticleCard({ article, compact = false, largeImage = false }: { 
               src={article.image}
               alt={article.imageAlt || article.title}
               fill
+              unoptimized
+              sizes={largeImage ? "(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" : "(max-width: 768px) 100vw, 480px"}
               className="object-cover transition-transform duration-300 group-hover:scale-105"
               style={largeImage ? { objectPosition: "center 78%" } : undefined}
             />

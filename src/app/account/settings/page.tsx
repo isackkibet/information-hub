@@ -18,7 +18,6 @@ export default function SettingsPage() {
   const router = useRouter();
   const { session, loading } = useSession();
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
 
   const saveProfile = async () => {

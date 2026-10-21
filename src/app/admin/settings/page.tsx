@@ -1,21 +1,75 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 
+type Settings = {
+  siteName: string;
+  tagline: string;
+  contactEmail: string;
+  contactLocation: string;
+};
+
+const DEFAULTS: Settings = {
+  siteName: "Sango Information Hub (SIHU)",
+  tagline: "We care about Lake Victoria.",
+  contactEmail: "",
+  contactLocation: "Lake Victoria Basin, Kenya",
+};
+
 export default function AdminSettingsPage() {
   const { toast } = useToast();
-  const [siteName, setSiteName] = useState("Sango Information Hub (SIHU)");
-  const [tagline, setTagline] = useState("We care about Lake Victoria.");
-  const [contactEmail, setContactEmail] = useState("");
-  const [contactLocation, setContactLocation] = useState("");
+  const [settings, setSettings] = useState<Settings>(DEFAULTS);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  const save = () => {
-    toast("Settings saved (demo — not persisted)", "success");
+  useEffect(() => {
+    let active = true;
+
+    fetch("/api/admin/settings", {
+      headers: { Authorization: `Bearer ${localStorage.getItem("sihu_token") ?? ""}` },
+    })
+      .then(async (response) => {
+        const data = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(data?.error || "Unable to load the settings");
+        if (active) setSettings({ ...DEFAULTS, ...(data?.settings ?? {}) });
+      })
+      .catch((error: Error) => {
+        if (active) toast(error.message, "error");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [toast]);
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      const response = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("sihu_token") ?? ""}`,
+        },
+        body: JSON.stringify(settings),
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error || "Unable to save the settings");
+      if (data?.settings) setSettings({ ...DEFAULTS, ...data.settings });
+      toast("Settings saved", "success");
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Unable to save the settings", "error");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -31,25 +85,43 @@ export default function AdminSettingsPage() {
             <p className="font-medium">General</p>
             <div>
               <Label htmlFor="site-name">Site name</Label>
-              <Input id="site-name" value={siteName} onChange={(e) => setSiteName(e.target.value)} />
+              <Input
+                id="site-name"
+                value={settings.siteName}
+                onChange={(e) => setSettings({ ...settings, siteName: e.target.value })}
+              />
             </div>
             <div>
               <Label htmlFor="tagline">Tagline</Label>
-              <Input id="tagline" value={tagline} onChange={(e) => setTagline(e.target.value)} />
+              <Input
+                id="tagline"
+                value={settings.tagline}
+                onChange={(e) => setSettings({ ...settings, tagline: e.target.value })}
+              />
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="space-y-3 p-4">
-            <p className="font-medium">Contact (Demo)</p>
+            <p className="font-medium">Contact</p>
             <div>
               <Label htmlFor="contact-email">Email</Label>
-              <Input id="contact-email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} placeholder="contact@sihu.org (demo)" />
+              <Input
+                id="contact-email"
+                value={settings.contactEmail}
+                onChange={(e) => setSettings({ ...settings, contactEmail: e.target.value })}
+                placeholder="contact@sihu.org"
+              />
             </div>
             <div>
               <Label htmlFor="contact-loc">Location</Label>
-              <Input id="contact-loc" value={contactLocation} onChange={(e) => setContactLocation(e.target.value)} placeholder="Lake Victoria Basin, Kenya (demo)" />
+              <Input
+                id="contact-loc"
+                value={settings.contactLocation}
+                onChange={(e) => setSettings({ ...settings, contactLocation: e.target.value })}
+                placeholder="Lake Victoria Basin, Kenya"
+              />
             </div>
           </CardContent>
         </Card>
@@ -83,7 +155,9 @@ export default function AdminSettingsPage() {
         </Card>
       </div>
 
-      <Button className="mt-4" onClick={save}>Save settings</Button>
+      <Button className="mt-4" disabled={saving || loading} onClick={() => void save()}>
+        {saving ? "Saving..." : "Save settings"}
+      </Button>
     </div>
   );
 }

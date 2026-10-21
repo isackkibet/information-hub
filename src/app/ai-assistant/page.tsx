@@ -10,10 +10,9 @@ import { Plus, Send, MessageSquare, Sparkles, AlertTriangle, RotateCcw } from "l
 import { AuthGuard } from "@/components/layout/auth-guard";
 
 const starters = [
-  "Ask a question about SIHU",
-  "Find a story or report",
-  "Summarise an article",
-  "Read a story aloud",
+  "Find a story about wetland restoration",
+  "Summarise a published SIHU article",
+  "What are communities doing to protect Lake Victoria?",
   "Explore a Sustainable Development Goal",
 ];
 
@@ -70,7 +69,7 @@ function AssistantContent() {
         <div>
           <h1 className="text-2xl font-semibold">AI Assistant</h1>
           <p className="text-muted-foreground">
-            Ask questions or discuss SIHU topics with Grok. This assistant does not search the SIHU article library.
+            Ask questions, find published SIHU stories, and get article summaries with links to sources.
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={newChat} disabled={loading}>
@@ -104,7 +103,7 @@ function AssistantContent() {
                 <div className="mb-4 rounded-md border border-border bg-muted/50 p-3 text-sm">
                   <p className="font-medium">Article context</p>
                   <p className="mt-1 text-muted-foreground">{ctxTitle}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">Only the title is provided to the assistant, not the article text.</p>
+                  <p className="mt-1 text-xs text-muted-foreground">The assistant will use this published article and link to it when available.</p>
                 </div>
               )}
 
@@ -151,7 +150,7 @@ function AssistantContent() {
 
                 {loading && (
                   <div className="max-w-[80%] rounded-lg bg-muted px-4 py-2 text-sm text-muted-foreground">
-                    Grok is thinking...
+                    Groq is thinking...
                   </div>
                 )}
 
@@ -176,7 +175,7 @@ function AssistantContent() {
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask SIHU AI..."
+                  placeholder="Ask about a topic or published SIHU story..."
                   disabled={loading}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {

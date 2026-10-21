@@ -69,7 +69,8 @@ export const MediaType = {
   RADIO: 'RADIO',
   PODCAST: 'PODCAST',
   VIDEO: 'VIDEO',
-  NEWSPAPER: 'NEWSPAPER'
+  NEWSPAPER: 'NEWSPAPER',
+  IMAGE: 'IMAGE'
 } as const
 
 export type MediaType = (typeof MediaType)[keyof typeof MediaType]

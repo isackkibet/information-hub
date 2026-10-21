@@ -1,25 +1,25 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { articles } from "@/data";
+import { getArticles, getArticleBySlug } from "@/backend/queries";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
 import { Sparkles, AlertCircle } from "lucide-react";
 import { ArticleCard } from "@/components/articles/article-card";
 import { ArticleActions } from "@/components/articles/article-actions";
+import { ArticlePhotoViewer } from "@/components/articles/article-photo-viewer";
 
-import { AuthGuard } from "@/components/layout/auth-guard";
+
+export const instant = false;
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const article = articles.find((a) => a.slug === slug);
-  if (!article) notFound();
-  const related = articles
-    .filter((a) => a.slug !== slug && a.categorySlug === article.categorySlug && a.status === "published")
-    .slice(0, 3);
+  const article = await getArticleBySlug(slug);
+  if (!article || article.status !== "published") notFound();
+
+  const sameTopic = await getArticles({ categorySlug: article.categorySlug, status: "published" });
+  const related = sameTopic.filter((a) => a.slug !== slug).slice(0, 3);
 
   return (
-    <AuthGuard type="auth">
       <div className="container mx-auto px-4 py-8">
         <div className="mx-auto max-w-3xl">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -54,9 +54,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         </p>
 
         {article.image && (
-          <div className="relative mt-6 h-72 w-full overflow-hidden rounded-lg">
-            <Image src={article.image} alt={article.imageAlt || article.title} fill className="object-cover" />
-          </div>
+          <ArticlePhotoViewer src={article.image} alt={article.imageAlt || article.title} caption={article.imageAlt} />
         )}
 
         <p className="mt-6 text-lg text-muted-foreground">{article.summary}</p>
@@ -108,6 +106,5 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         )}
       </div>
     </div>
-    </AuthGuard>
   );
 }

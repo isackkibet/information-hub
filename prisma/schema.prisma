@@ -53,6 +53,7 @@ enum MediaType {
   PODCAST
   VIDEO
   NEWSPAPER
+  IMAGE
 }
 
 enum AuditAction {
@@ -135,6 +136,7 @@ model Report {
   location      String?
   status        ReportStatus @default(SUBMITTED)
   hasAttachment Boolean      @default(false)
+  attachmentUrl String?
   notes         String?
   submittedAt   DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
@@ -191,10 +193,18 @@ model MediaItem {
   title       String
   description String    @default("")
   image       String?
+  mediaUrl    String?
   duration    String?
+  isPublished Boolean   @default(true)
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
 
   categoryId String?
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+}
+
+model SiteSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
 }

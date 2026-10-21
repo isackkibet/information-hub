@@ -1,4 +1,4 @@
-import { auditEvents } from "@/data";
+import { getAuditEvents } from "@/backend/queries";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -22,19 +22,23 @@ const actionColors: Record<string, string> = {
   "report.reviewed": "bg-teal-100 text-teal-700 dark:bg-teal-950 dark:text-teal-300",
 };
 
-export default function AdminAuditPage() {
+export const instant = false;
+
+export default async function AdminAuditPage() {
+  const auditEvents = await getAuditEvents();
+
   return (
     <div>
       <h1 className="text-2xl font-semibold">Audit History</h1>
       <p className="text-muted-foreground">
-        Demonstration events showing actor, action, affected item, and timestamp.
+        Recorded events showing actor, action, affected item, and timestamp.
       </p>
 
       <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-300">
         <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
         <p>
-          This frontend-only audit log is not secure or tamper-proof. A real backend must independently enforce
-          audit integrity, protect against modification, and persist logs securely.
+          Audit entries are written server-side and can only be read by administrators and leadership. They are
+          not tamper-proof on their own — protect the database to keep them trustworthy.
         </p>
       </div>
 

@@ -33,16 +33,16 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Connect the AI Assistant to Grok
+## Connect the AI Assistant to Groq
 
 1. Copy `.env.example` to `.env` and replace the placeholders you need.
-2. Set `XAI_API_KEY` in `.env` to an API key from the [xAI Console](https://console.x.ai/).
-3. Keep `XAI_MODEL` as `grok-4.7`, or change it to a model enabled for your xAI account.
+2. Set `GROQ_API_KEY` in `.env` to an API key from the [Groq Console](https://console.groq.com/keys).
+3. Keep `GROQ_MODEL` as `openai/gpt-oss-20b`, or change it to a model enabled for your Groq account.
 4. Restart the development server. The key is read only by the server and is never sent to the browser.
 
 Set `DATABASE_URL` and `JWT_SECRET` for account sign-in. To seed role accounts, provide `ADMIN_EMAIL` and `ADMIN_PASSWORD`; other role accounts are optional and use the matching variables shown in `.env.example`. The seed script has no built-in passwords.
 
-The assistant sends chat requests through `/api/ai/chat` to xAI's Responses API. It uses the article title as optional context, but does not search or retrieve SIHU article content yet.
+The assistant sends chat requests through `/api/ai/chat` to Groq's OpenAI-compatible Chat Completions API. It uses the article title as optional context, but does not search or retrieve SIHU article content yet.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

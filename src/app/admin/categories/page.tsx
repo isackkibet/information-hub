@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { categories as initialCategories } from "@/data";
+import { useEffect, useState } from "react";
+import { contentApi } from "@/frontend/services";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -16,9 +16,37 @@ import { useToast } from "@/components/ui/toast";
 import { Pencil, Plus, X } from "lucide-react";
 import type { Category } from "@/types";
 
+async function updateCategory(id: string, changes: Partial<Category>) {
+  const response = await fetch(`/api/admin/categories/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("sihu_token") ?? ""}`,
+    },
+    body: JSON.stringify(changes),
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(data?.error || "Unable to update the category");
+  return data.category as Category;
+}
+
+async function createCategory(payload: { name: string; slug: string; description: string }) {
+  const response = await fetch("/api/admin/categories", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("sihu_token") ?? ""}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(data?.error || "Unable to create the category");
+  return data.category as Category;
+}
+
 export default function AdminCategoriesPage() {
   const { toast } = useToast();
-  const [cats, setCats] = useState<Category[]>(initialCategories);
+  const [cats, setCats] = useState<Category[]>([]);
   const [editing, setEditing] = useState<Category | null>(null);
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState("");
@@ -26,39 +54,73 @@ export default function AdminCategoriesPage() {
   const [newSlug, setNewSlug] = useState("");
   const [dialog, setDialog] = useState<{ type: string; catId: string } | null>(null);
 
-  const toggle = (id: string) => {
-    setCats((prev) => prev.map((c) => (c.id === id ? { ...c, enabled: !c.enabled } : c)));
-    toast("Category status toggled (demo)", "success");
+  useEffect(() => {
+    let active = true;
+    contentApi
+      .getCategories()
+      .then((data) => {
+        if (active) setCats(data);
+      })
+      .catch(() => {
+        if (active) setCats([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const toggle = async (id: string) => {
+    const current = cats.find((c) => c.id === id);
+    if (!current) return;
+
+    try {
+      const updated = await updateCategory(id, { enabled: !current.enabled });
+      setCats((prev) => prev.map((c) => (c.id === id ? updated : c)));
+      toast("Category status toggled", "success");
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Unable to update the category", "error");
+    }
   };
 
-  const saveEdit = () => {
+  const saveEdit = async () => {
     if (!editing) return;
-    setCats((prev) => prev.map((c) => (c.id === editing.id ? editing : c)));
-    toast("Category updated (demo)", "success");
-    setEditing(null);
+
+    try {
+      const updated = await updateCategory(editing.id, {
+        name: editing.name,
+        slug: editing.slug,
+        description: editing.description,
+      });
+      setCats((prev) => prev.map((c) => (c.id === editing.id ? updated : c)));
+      toast("Category updated", "success");
+      setEditing(null);
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Unable to update the category", "error");
+    }
   };
 
-  const addCategory = () => {
+  const addCategory = async () => {
     if (!newName.trim() || !newSlug.trim()) {
       toast("Name and slug are required", "error");
       return;
     }
-    setCats((prev) => [
-      ...prev,
-      {
-        id: `cat-${Date.now()}`,
-        slug: newSlug.trim(),
+
+    try {
+      const created = await createCategory({
         name: newName.trim(),
+        slug: newSlug.trim(),
         description: newDesc.trim(),
-        enabled: true,
-        order: prev.length + 1,
-      },
-    ]);
-    toast("Category added (demo)", "success");
-    setNewName("");
-    setNewDesc("");
-    setNewSlug("");
-    setAdding(false);
+      });
+      setCats((prev) => [...prev, created]);
+      toast("Category added", "success");
+      setNewName("");
+      setNewDesc("");
+      setNewSlug("");
+      setAdding(false);
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Unable to create the category", "error");
+    }
   };
 
   return (
@@ -172,9 +234,9 @@ export default function AdminCategoriesPage() {
       <ConfirmDialog
         open={!!dialog}
         title="Change category status?"
-        message="This will enable or disable the category. Disabled categories are hidden from the Portal. Demo action — not persisted."
+        message="This will enable or disable the category. Disabled categories are hidden from the Portal."
         confirmLabel="Confirm"
-        onConfirm={() => { if (dialog) toggle(dialog.catId); setDialog(null); }}
+        onConfirm={() => { if (dialog) void toggle(dialog.catId); setDialog(null); }}
         onCancel={() => setDialog(null)}
       />
     </div>

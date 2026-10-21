@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { articles } from "@/data";
+import { useEffect, useState } from "react";
+import { contentApi, workflowService } from "@/frontend/services";
+import type { Article } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,22 +18,57 @@ export default function EditorialPage() {
   const { toast } = useToast();
   const [dialog, setDialog] = useState<{ type: "approve" | "reject" | "changes"; articleId: string; title: string } | null>(null);
   const [reason, setReason] = useState("");
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    contentApi
+      .getArticles({ status: "submitted" })
+      .then((data) => {
+        if (active) setArticles(data);
+      })
+      .catch(() => {
+        if (active) setArticles([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const pending = articles.filter((a) =>
     ["submitted", "in_review", "changes_requested"].includes(a.status)
   );
 
-  const confirm = () => {
+  const confirm = async () => {
     if (!dialog) return;
-    if (dialog.type === "approve") {
-      toast(`"${dialog.title}" approved (demo — not published automatically)`, "success");
-    } else if (dialog.type === "reject") {
-      toast(`"${dialog.title}" rejected (demo)`, "error");
-    } else {
-      toast(`Changes requested for "${dialog.title}" (demo)`, "info");
+
+    setBusy(true);
+    try {
+      if (dialog.type === "approve") {
+        await workflowService.approve(dialog.articleId);
+      } else if (dialog.type === "reject") {
+        await workflowService.reject(dialog.articleId);
+      } else {
+        await workflowService.requestChanges(dialog.articleId);
+      }
+      setArticles((current) => current.filter((a) => a.id !== dialog.articleId));
+      toast(
+        dialog.type === "approve"
+          ? `"${dialog.title}" approved`
+          : dialog.type === "reject"
+            ? `"${dialog.title}" rejected`
+            : `Changes requested for "${dialog.title}"`,
+        dialog.type === "reject" ? "error" : "success"
+      );
+      setDialog(null);
+      setReason("");
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Unable to update the article", "error");
+    } finally {
+      setBusy(false);
     }
-    setDialog(null);
-    setReason("");
   };
 
   return (
@@ -59,7 +95,7 @@ export default function EditorialPage() {
                   <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{a.summary}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Button size="sm" variant="outline" onClick={() => toast(`Reviewing "${a.title}" (demo)`, "info")}>
+                  <Button size="sm" variant="outline" onClick={() => toast(`Opening "${a.title}"`, "info")}>
                     <Eye className="h-3 w-3" />
                     Review
                   </Button>
@@ -83,7 +119,7 @@ export default function EditorialPage() {
         {pending.length === 0 && (
           <Card>
             <CardContent className="p-4 text-sm text-muted-foreground">
-              No articles pending editorial review (demo).
+              No articles pending editorial review.
             </CardContent>
           </Card>
         )}
@@ -97,13 +133,13 @@ export default function EditorialPage() {
         }
         message={
           dialog?.type === "approve"
-            ? "Approving sends the article forward. Publication is a separate step. Demo action."
+            ? "Approving sends the article forward. Publication is a separate step."
             : dialog?.type === "reject"
-            ? "Provide a reason for rejection. This is a demo action."
-            : "Provide specific change requests for the author. This is a demo action."
+            ? "Provide a reason for rejection."
+            : "Provide specific change requests for the author."
         }
         confirmLabel={dialog?.type === "approve" ? "Approve" : dialog?.type === "reject" ? "Reject" : "Send"}
-        onConfirm={confirm}
+        onConfirm={() => void confirm()}
         onCancel={() => { setDialog(null); setReason(""); }}
       />
 
@@ -117,7 +153,7 @@ export default function EditorialPage() {
             </div>
             <div className="mt-4 flex justify-end gap-2">
               <Button variant="outline" size="sm" onClick={() => { setDialog(null); setReason(""); }}>Cancel</Button>
-              <Button size="sm" onClick={confirm}>{dialog.type === "reject" ? "Reject" : "Send request"}</Button>
+              <Button size="sm" disabled={busy} onClick={() => void confirm()}>{dialog.type === "reject" ? "Reject" : "Send request"}</Button>
             </div>
           </div>
         </div>

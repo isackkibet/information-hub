@@ -31,6 +31,7 @@ export type ReportMinAggregateOutputType = {
   location: string | null
   status: $Enums.ReportStatus | null
   hasAttachment: boolean | null
+  attachmentUrl: string | null
   notes: string | null
   submittedAt: Date | null
   updatedAt: Date | null
@@ -45,6 +46,7 @@ export type ReportMaxAggregateOutputType = {
   location: string | null
   status: $Enums.ReportStatus | null
   hasAttachment: boolean | null
+  attachmentUrl: string | null
   notes: string | null
   submittedAt: Date | null
   updatedAt: Date | null
@@ -59,6 +61,7 @@ export type ReportCountAggregateOutputType = {
   location: number
   status: number
   hasAttachment: number
+  attachmentUrl: number
   notes: number
   submittedAt: number
   updatedAt: number
@@ -75,6 +78,7 @@ export type ReportMinAggregateInputType = {
   location?: true
   status?: true
   hasAttachment?: true
+  attachmentUrl?: true
   notes?: true
   submittedAt?: true
   updatedAt?: true
@@ -89,6 +93,7 @@ export type ReportMaxAggregateInputType = {
   location?: true
   status?: true
   hasAttachment?: true
+  attachmentUrl?: true
   notes?: true
   submittedAt?: true
   updatedAt?: true
@@ -103,6 +108,7 @@ export type ReportCountAggregateInputType = {
   location?: true
   status?: true
   hasAttachment?: true
+  attachmentUrl?: true
   notes?: true
   submittedAt?: true
   updatedAt?: true
@@ -190,6 +196,7 @@ export type ReportGroupByOutputType = {
   location: string | null
   status: $Enums.ReportStatus
   hasAttachment: boolean
+  attachmentUrl: string | null
   notes: string | null
   submittedAt: Date
   updatedAt: Date
@@ -225,6 +232,7 @@ export type ReportWhereInput = {
   location?: Prisma.StringNullableFilter<"Report"> | string | null
   status?: Prisma.EnumReportStatusFilter<"Report"> | $Enums.ReportStatus
   hasAttachment?: Prisma.BoolFilter<"Report"> | boolean
+  attachmentUrl?: Prisma.StringNullableFilter<"Report"> | string | null
   notes?: Prisma.StringNullableFilter<"Report"> | string | null
   submittedAt?: Prisma.DateTimeFilter<"Report"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Report"> | Date | string
@@ -241,6 +249,7 @@ export type ReportOrderByWithRelationInput = {
   location?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   hasAttachment?: Prisma.SortOrder
+  attachmentUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -260,6 +269,7 @@ export type ReportWhereUniqueInput = Prisma.AtLeast<{
   location?: Prisma.StringNullableFilter<"Report"> | string | null
   status?: Prisma.EnumReportStatusFilter<"Report"> | $Enums.ReportStatus
   hasAttachment?: Prisma.BoolFilter<"Report"> | boolean
+  attachmentUrl?: Prisma.StringNullableFilter<"Report"> | string | null
   notes?: Prisma.StringNullableFilter<"Report"> | string | null
   submittedAt?: Prisma.DateTimeFilter<"Report"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Report"> | Date | string
@@ -276,6 +286,7 @@ export type ReportOrderByWithAggregationInput = {
   location?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   hasAttachment?: Prisma.SortOrder
+  attachmentUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -296,6 +307,7 @@ export type ReportScalarWhereWithAggregatesInput = {
   location?: Prisma.StringNullableWithAggregatesFilter<"Report"> | string | null
   status?: Prisma.EnumReportStatusWithAggregatesFilter<"Report"> | $Enums.ReportStatus
   hasAttachment?: Prisma.BoolWithAggregatesFilter<"Report"> | boolean
+  attachmentUrl?: Prisma.StringNullableWithAggregatesFilter<"Report"> | string | null
   notes?: Prisma.StringNullableWithAggregatesFilter<"Report"> | string | null
   submittedAt?: Prisma.DateTimeWithAggregatesFilter<"Report"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Report"> | Date | string
@@ -310,6 +322,7 @@ export type ReportCreateInput = {
   location?: string | null
   status?: $Enums.ReportStatus
   hasAttachment?: boolean
+  attachmentUrl?: string | null
   notes?: string | null
   submittedAt?: Date | string
   updatedAt?: Date | string
@@ -324,6 +337,7 @@ export type ReportUncheckedCreateInput = {
   location?: string | null
   status?: $Enums.ReportStatus
   hasAttachment?: boolean
+  attachmentUrl?: string | null
   notes?: string | null
   submittedAt?: Date | string
   updatedAt?: Date | string
@@ -338,6 +352,7 @@ export type ReportUpdateInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
   hasAttachment?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  attachmentUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -352,6 +367,7 @@ export type ReportUncheckedUpdateInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
   hasAttachment?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  attachmentUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -366,6 +382,7 @@ export type ReportCreateManyInput = {
   location?: string | null
   status?: $Enums.ReportStatus
   hasAttachment?: boolean
+  attachmentUrl?: string | null
   notes?: string | null
   submittedAt?: Date | string
   updatedAt?: Date | string
@@ -380,6 +397,7 @@ export type ReportUpdateManyMutationInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
   hasAttachment?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  attachmentUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -392,6 +410,7 @@ export type ReportUncheckedUpdateManyInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
   hasAttachment?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  attachmentUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -416,6 +435,7 @@ export type ReportCountOrderByAggregateInput = {
   location?: Prisma.SortOrder
   status?: Prisma.SortOrder
   hasAttachment?: Prisma.SortOrder
+  attachmentUrl?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -430,6 +450,7 @@ export type ReportMaxOrderByAggregateInput = {
   location?: Prisma.SortOrder
   status?: Prisma.SortOrder
   hasAttachment?: Prisma.SortOrder
+  attachmentUrl?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -444,6 +465,7 @@ export type ReportMinOrderByAggregateInput = {
   location?: Prisma.SortOrder
   status?: Prisma.SortOrder
   hasAttachment?: Prisma.SortOrder
+  attachmentUrl?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -546,6 +568,7 @@ export type ReportCreateWithoutSubmittedByInput = {
   location?: string | null
   status?: $Enums.ReportStatus
   hasAttachment?: boolean
+  attachmentUrl?: string | null
   notes?: string | null
   submittedAt?: Date | string
   updatedAt?: Date | string
@@ -559,6 +582,7 @@ export type ReportUncheckedCreateWithoutSubmittedByInput = {
   location?: string | null
   status?: $Enums.ReportStatus
   hasAttachment?: boolean
+  attachmentUrl?: string | null
   notes?: string | null
   submittedAt?: Date | string
   updatedAt?: Date | string
@@ -601,6 +625,7 @@ export type ReportScalarWhereInput = {
   location?: Prisma.StringNullableFilter<"Report"> | string | null
   status?: Prisma.EnumReportStatusFilter<"Report"> | $Enums.ReportStatus
   hasAttachment?: Prisma.BoolFilter<"Report"> | boolean
+  attachmentUrl?: Prisma.StringNullableFilter<"Report"> | string | null
   notes?: Prisma.StringNullableFilter<"Report"> | string | null
   submittedAt?: Prisma.DateTimeFilter<"Report"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Report"> | Date | string
@@ -615,6 +640,7 @@ export type ReportCreateWithoutCategoryInput = {
   location?: string | null
   status?: $Enums.ReportStatus
   hasAttachment?: boolean
+  attachmentUrl?: string | null
   notes?: string | null
   submittedAt?: Date | string
   updatedAt?: Date | string
@@ -628,6 +654,7 @@ export type ReportUncheckedCreateWithoutCategoryInput = {
   location?: string | null
   status?: $Enums.ReportStatus
   hasAttachment?: boolean
+  attachmentUrl?: string | null
   notes?: string | null
   submittedAt?: Date | string
   updatedAt?: Date | string
@@ -667,6 +694,7 @@ export type ReportCreateManySubmittedByInput = {
   location?: string | null
   status?: $Enums.ReportStatus
   hasAttachment?: boolean
+  attachmentUrl?: string | null
   notes?: string | null
   submittedAt?: Date | string
   updatedAt?: Date | string
@@ -680,6 +708,7 @@ export type ReportUpdateWithoutSubmittedByInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
   hasAttachment?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  attachmentUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -693,6 +722,7 @@ export type ReportUncheckedUpdateWithoutSubmittedByInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
   hasAttachment?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  attachmentUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -706,6 +736,7 @@ export type ReportUncheckedUpdateManyWithoutSubmittedByInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
   hasAttachment?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  attachmentUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -719,6 +750,7 @@ export type ReportCreateManyCategoryInput = {
   location?: string | null
   status?: $Enums.ReportStatus
   hasAttachment?: boolean
+  attachmentUrl?: string | null
   notes?: string | null
   submittedAt?: Date | string
   updatedAt?: Date | string
@@ -732,6 +764,7 @@ export type ReportUpdateWithoutCategoryInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
   hasAttachment?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  attachmentUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -745,6 +778,7 @@ export type ReportUncheckedUpdateWithoutCategoryInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
   hasAttachment?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  attachmentUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -758,6 +792,7 @@ export type ReportUncheckedUpdateManyWithoutCategoryInput = {
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
   hasAttachment?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  attachmentUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -773,6 +808,7 @@ export type ReportSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   location?: boolean
   status?: boolean
   hasAttachment?: boolean
+  attachmentUrl?: boolean
   notes?: boolean
   submittedAt?: boolean
   updatedAt?: boolean
@@ -789,6 +825,7 @@ export type ReportSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   location?: boolean
   status?: boolean
   hasAttachment?: boolean
+  attachmentUrl?: boolean
   notes?: boolean
   submittedAt?: boolean
   updatedAt?: boolean
@@ -805,6 +842,7 @@ export type ReportSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   location?: boolean
   status?: boolean
   hasAttachment?: boolean
+  attachmentUrl?: boolean
   notes?: boolean
   submittedAt?: boolean
   updatedAt?: boolean
@@ -821,6 +859,7 @@ export type ReportSelectScalar = {
   location?: boolean
   status?: boolean
   hasAttachment?: boolean
+  attachmentUrl?: boolean
   notes?: boolean
   submittedAt?: boolean
   updatedAt?: boolean
@@ -828,7 +867,7 @@ export type ReportSelectScalar = {
   submittedById?: boolean
 }
 
-export type ReportOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "location" | "status" | "hasAttachment" | "notes" | "submittedAt" | "updatedAt" | "categoryId" | "submittedById", ExtArgs["result"]["report"]>
+export type ReportOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "location" | "status" | "hasAttachment" | "attachmentUrl" | "notes" | "submittedAt" | "updatedAt" | "categoryId" | "submittedById", ExtArgs["result"]["report"]>
 export type ReportInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   category?: boolean | Prisma.CategoryDefaultArgs<ExtArgs>
   submittedBy?: boolean | Prisma.Report$submittedByArgs<ExtArgs>
@@ -855,6 +894,7 @@ export type $ReportPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     location: string | null
     status: $Enums.ReportStatus
     hasAttachment: boolean
+    attachmentUrl: string | null
     notes: string | null
     submittedAt: Date
     updatedAt: Date
@@ -1291,6 +1331,7 @@ export interface ReportFieldRefs {
   readonly location: Prisma.FieldRef<"Report", 'String'>
   readonly status: Prisma.FieldRef<"Report", 'ReportStatus'>
   readonly hasAttachment: Prisma.FieldRef<"Report", 'Boolean'>
+  readonly attachmentUrl: Prisma.FieldRef<"Report", 'String'>
   readonly notes: Prisma.FieldRef<"Report", 'String'>
   readonly submittedAt: Prisma.FieldRef<"Report", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Report", 'DateTime'>

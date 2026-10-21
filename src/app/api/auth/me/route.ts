@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { NextResponse } from "next/server";
 import { prisma } from "@/backend/database/prisma";
 import { extractToken, verifyToken } from "@/backend/auth/jwt";
@@ -33,7 +34,7 @@ export async function GET(req: Request) {
       },
     });
   } catch (error) {
-    console.error("Session error:", error);
+    unstable_rethrow(error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

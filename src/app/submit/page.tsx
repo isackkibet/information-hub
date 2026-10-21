@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { FormField, FormTextarea, FormSelect } from "@/components/forms/form-field";
 import { Card, CardContent } from "@/components/ui/card";
-import { categories } from "@/data";
-import { fileUploadService } from "@/frontend/services";
+import { contentApi, fileUploadService, reportService } from "@/frontend/services";
+import type { Category } from "@/types";
 import { useToast } from "@/components/ui/toast";
-import { CheckCircle, FileText, Loader2 } from "lucide-react";
+import { CheckCircle, FileText, ImagePlus, Loader2, Upload, X } from "lucide-react";
 
 interface FormState {
   title: string;
@@ -24,6 +25,55 @@ export default function SubmitReportPage() {
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
+  const [categoryOptions, setCategoryOptions] = useState<Category[]>([]);
+  const [categoryLoadError, setCategoryLoadError] = useState("");
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [attachmentError, setAttachmentError] = useState("");
+  const [attachmentPreview, setAttachmentPreview] = useState("");
+  const [attachmentInputKey, setAttachmentInputKey] = useState(0);
+  const [reportId, setReportId] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    contentApi.getCategories().then((result) => {
+      if (active) setCategoryOptions(result);
+    }).catch(() => {
+      if (active) setCategoryLoadError("Categories could not be loaded. Refresh the page and try again.");
+    });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!attachment || !attachment.type.startsWith("image/")) {
+      setAttachmentPreview("");
+      return;
+    }
+    const previewUrl = URL.createObjectURL(attachment);
+    setAttachmentPreview(previewUrl);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [attachment]);
+
+  const chooseAttachment = (file?: File) => {
+    setAttachmentError("");
+    if (!file) {
+      setAttachment(null);
+      return;
+    }
+    const allowedTypes = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      setAttachmentError("Choose a PDF, JPG, PNG, or WEBP file.");
+      setAttachment(null);
+      setAttachmentInputKey((key) => key + 1);
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      setAttachmentError("This file is larger than 8 MB. Choose a smaller file.");
+      setAttachment(null);
+      setAttachmentInputKey((key) => key + 1);
+      return;
+    }
+    setAttachment(file);
+  };
 
   const validate = (): boolean => {
     const e: Partial<Record<keyof FormState, string>> = {};
@@ -43,16 +93,31 @@ export default function SubmitReportPage() {
       return;
     }
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
+    let uploadedId: string | undefined;
+    try {
+      let attachmentId: string | undefined;
+      if (attachment) {
+        const upload = await fileUploadService.upload(attachment);
+        if (!upload.ok || !upload.id) throw new Error(upload.reason || "The attachment could not be uploaded.");
+        attachmentId = upload.id;
+        uploadedId = upload.id;
+      }
+      const result = await reportService.submit({
+        title: form.title.trim(),
+        description: form.description.trim(),
+        categoryId: form.category,
+        location: form.location.trim() || undefined,
+        attachmentId,
+      });
+      setReportId(result.report.id);
       setSent(true);
-      toast("Report submitted successfully (demo)", "success");
-    }, 800);
-  };
-
-  const handleUpload = async () => {
-    const res = await fileUploadService.upload();
-    if (res.reason) toast(res.reason, "info");
+      toast("Your report was submitted", "success");
+    } catch (error) {
+      if (uploadedId) await fileUploadService.remove(uploadedId).catch(() => undefined);
+      toast(error instanceof Error ? error.message : "Unable to submit your report", "error");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (sent) {
@@ -66,21 +131,18 @@ export default function SubmitReportPage() {
               </div>
               <div>
                 <h1 className="text-xl font-semibold">Report submitted</h1>
-                <p className="text-sm text-muted-foreground">Demo confirmation. Not stored permanently.</p>
+                <p className="text-sm text-muted-foreground">Your report has been saved for review.</p>
               </div>
             </div>
             <div className="mt-4 space-y-2 rounded-lg bg-muted p-4 text-sm">
               <p><span className="font-medium">Title:</span> {form.title}</p>
-              <p><span className="font-medium">Category:</span> {categories.find(c => c.id === form.category)?.name}</p>
+              <p><span className="font-medium">Category:</span> {categoryOptions.find(c => c.id === form.category)?.name}</p>
               <p><span className="font-medium">Location:</span> {form.location || "Not specified"}</p>
+              {reportId && <p><span className="font-medium">Reference:</span> {reportId}</p>}
             </div>
             <div className="mt-4 flex gap-2">
-              <Button onClick={() => { setForm(EMPTY); setSent(false); }}>Submit another report</Button>
+              <Button onClick={() => { setForm(EMPTY); setAttachment(null); setAttachmentInputKey((key) => key + 1); setReportId(""); setSent(false); }}>Submit another report</Button>
             </div>
-            <p className="mt-3 text-xs text-muted-foreground">
-              Reports are not permanently stored without a backend. Connect a storage service to persist
-              submissions.
-            </p>
           </CardContent>
         </Card>
       </div>
@@ -124,10 +186,11 @@ export default function SubmitReportPage() {
                 required
               >
                 <option value="">Select a category</option>
-                {categories.filter((c) => c.enabled).map((c) => (
+                {categoryOptions.filter((c) => c.enabled).map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </FormSelect>
+              {categoryLoadError && <p role="alert" className="text-sm text-destructive">{categoryLoadError}</p>}
               <FormField
                 label="Location"
                 value={form.location}
@@ -135,32 +198,47 @@ export default function SubmitReportPage() {
                 placeholder="County or area (optional)"
                 hint="Helps reviewers identify the area affected"
               />
-              <div className="space-y-1.5">
-                <p className="text-sm font-medium">Attachment (Demo)</p>
-                <div className="flex items-center gap-2">
-                  <Button type="button" variant="outline" onClick={handleUpload}>
-                    <FileText className="h-4 w-4" />
-                    Attach file
-                  </Button>
+              <div className="space-y-2">
+                <div>
+                  <p className="text-sm font-medium">Add a photo or document <span className="font-normal text-muted-foreground">(optional)</span></p>
+                  <p className="mt-1 text-xs text-muted-foreground">A clear photo can help reviewers understand your report.</p>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  File uploads are not configured. Attachments are not stored.
-                </p>
+                <input
+                  id="report-attachment"
+                  key={attachmentInputKey}
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
+                  className="sr-only"
+                  onChange={(event) => chooseAttachment(event.target.files?.[0])}
+                />
+                <label htmlFor="report-attachment" className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-primary/40 bg-primary/[0.03] px-4 py-5 text-sm font-medium transition hover:bg-primary/[0.08] focus-within:ring-2 focus-within:ring-ring">
+                  <ImagePlus className="h-5 w-5 text-primary" />
+                  {attachment ? "Choose a different file" : "Choose a photo or document"}
+                  <span className="font-normal text-muted-foreground">from this device</span>
+                </label>
+                <p className="text-xs text-muted-foreground">PDF, JPG, PNG, or WEBP · Maximum 8 MB</p>
+                {attachmentError && <p role="alert" className="text-sm text-destructive">{attachmentError}</p>}
+                {attachment && <div className="flex items-center gap-3 rounded-lg border p-3">
+                  {attachmentPreview ? <img src={attachmentPreview} alt="Selected report photo preview" className="h-16 w-16 rounded-md object-cover" /> : <span className="flex h-12 w-12 items-center justify-center rounded-md bg-muted"><FileText className="h-5 w-5" /></span>}
+                  <div className="min-w-0 flex-1 text-sm"><p className="truncate font-medium">{attachment.name}</p><p className="text-muted-foreground">{(attachment.size / 1024 / 1024).toFixed(1)} MB · Ready to attach</p></div>
+                  <Button type="button" size="sm" variant="ghost" aria-label="Remove attachment" onClick={() => { chooseAttachment(); setAttachmentInputKey((key) => key + 1); }}><X className="h-4 w-4" /></Button>
+                </div>}
               </div>
 
-              <Button type="submit" disabled={submitting} className="w-full sm:w-auto">
+              <Button type="submit" disabled={submitting || categoryOptions.length === 0 || Boolean(categoryLoadError) || Boolean(attachmentError)} className="w-full sm:w-auto">
                 {submitting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Submitting...
                   </>
                 ) : (
-                  "Submit Report (Demo)"
+                    <><Upload className="h-4 w-4" />Submit Report</>
                 )}
               </Button>
             </form>
           </CardContent>
         </Card>
+        <p className="mt-4 text-sm text-muted-foreground">Want to check a previous report? <Link href="/account/submissions" className="font-medium text-primary hover:underline">View my submissions</Link></p>
       </div>
     </div>
   );

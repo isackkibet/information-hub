@@ -1,10 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 // import { StatusBadge } from "@/components/ui/status-badge";
-import { articles, reports, users, auditEvents } from "@/data";
+import { adminService, auditService, contentApi, reportService } from "@/frontend/services";
+import type { Article, AuditEvent, Report, User } from "@/types";
 import { formatDate } from "@/lib/utils";
 import { useSession } from "@/hooks/use-session";
 import { canAccessAdmin, canAccessEditorial, canAccessVerification } from "@/lib/permissions";
@@ -12,6 +14,21 @@ import { BarChart3, FileText, Users, AlertTriangle, ArrowRight, ShieldCheck } fr
 
 export default function LeadershipPage() {
   const { session, loading } = useSession();
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
+
+  useEffect(() => {
+    let active = true;
+
+    contentApi.getArticles().then((data) => { if (active) setArticles(data); }).catch(() => {});
+    reportService.list().then((data) => { if (active) setReports(data); }).catch(() => {});
+    auditService.list().then((data) => { if (active) setAuditEvents(data as AuditEvent[]); }).catch(() => {});
+    adminService.listUsers().then((data) => { if (active) setUsers(data); }).catch(() => {});
+
+    return () => { active = false; };
+  }, []);
 
   if (loading) {
     return (
@@ -44,28 +61,30 @@ export default function LeadershipPage() {
             </div>
             <h1 className="mt-4 text-xl font-semibold">Access denied</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              The Leadership workspace requires the Leadership role. Use the demo sign-in switcher to preview.
+              The Leadership workspace requires the Leadership role.
             </p>
-            <Link href="/sign-in"><Button className="mt-4" variant="outline">Switch role (demo)</Button></Link>
+            <Link href="/sign-in"><Button className="mt-4" variant="outline">Sign in</Button></Link>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  // Compute summaries from mock data
   const published = articles.filter((a) => a.status === "published").length;
   const pendingReview = articles.filter((a) => ["submitted", "in_review", "changes_requested"].includes(a.status)).length;
   const pendingVerification = reports.filter((r) => ["submitted", "under_review", "needs_info"].includes(r.status)).length;
   const activeUsers = users.filter((u) => u.status === "active").length;
 
-  // Articles by category
-  const byCategory = [
-    { name: "Environment & Conservation", count: articles.filter((a) => a.categorySlug === "environment-conservation" && a.status === "published").length },
-    { name: "Blue Economy", count: articles.filter((a) => a.categorySlug === "blue-economy" && a.status === "published").length },
-    { name: "Community Development", count: articles.filter((a) => a.categorySlug === "community-development" && a.status === "published").length },
-    { name: "Human Rights", count: articles.filter((a) => a.categorySlug === "human-rights" && a.status === "published").length },
-  ];
+  const publishedTotal = articles.filter((a) => a.status === "published").length;
+
+  const byCategory = Array.from(
+    articles
+      .filter((a) => a.status === "published")
+      .reduce((map, article) => {
+        map.set(article.categoryName, (map.get(article.categoryName) ?? 0) + 1);
+        return map;
+      }, new Map<string, number>())
+  ).map(([name, count]) => ({ name, count }));
 
   const recentActivity = auditEvents.slice(0, 5);
 
@@ -81,7 +100,7 @@ export default function LeadershipPage() {
       <div>
         <h1 className="text-2xl font-semibold">Leadership Summary</h1>
         <p className="text-muted-foreground">
-          Operational summaries from SIHU demonstration data. Permitted overview only — no sensitive data,
+          Operational summaries from SIHU. Permitted overview only — no sensitive data,
           private identities, or internal notes are exposed here.
         </p>
       </div>
@@ -100,7 +119,6 @@ export default function LeadershipPage() {
                   <p className="text-xs text-muted-foreground">{s.label}</p>
                 </div>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">Mock data (demo)</p>
             </CardContent>
           </Card>
         ))}
@@ -120,7 +138,7 @@ export default function LeadershipPage() {
                 <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted">
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-cyan-600 to-teal-500"
-                    style={{ width: `${(c.count / articles.filter(a => a.status === "published").length) * 100}%` }}
+                    style={{ width: `${publishedTotal ? (c.count / publishedTotal) * 100 : 0}%` }}
                   />
                 </div>
               </div>
@@ -176,8 +194,8 @@ export default function LeadershipPage() {
       </div>
 
       <p className="mt-4 text-xs text-muted-foreground">
-        All data shown is demonstration content. Real operational dashboards require a connected backend with
-        proper data aggregation, access control, and audit verification.
+        Figures are live counts from the SIHU database. Treat them as an operational snapshot, not an audited
+        record.
       </p>
     </div>
   );

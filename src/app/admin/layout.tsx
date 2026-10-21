@@ -1,6 +1,6 @@
 import AdminLayoutClient from "./admin-layout-client";
 
-// Admin access depends on a demo role stored in the browser, so this subtree
+// Admin access depends on the session role stored in the browser, so this subtree
 // cannot be validated as a fully server-rendered instant-navigation segment.
 export const instant = false;
 

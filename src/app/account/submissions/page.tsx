@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { reports } from "@/data";
+import { reportService } from "@/frontend/services";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -11,7 +11,6 @@ import { useSession } from "@/hooks/use-session";
 import { ChevronDown, ChevronUp, FileText, MapPin } from "lucide-react";
 import type { Report } from "@/types";
 
-// Demo timeline for each report status
 function getStatusTimeline(status: string, submittedAt: string) {
   const steps = [
     { label: "Submitted", date: submittedAt, done: true },
@@ -25,7 +24,27 @@ function getStatusTimeline(status: string, submittedAt: string) {
 
 export default function SubmissionsPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [myReports, setMyReports] = useState<Report[]>([]);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const { session, loading } = useSession();
+
+  useEffect(() => {
+    if (!session.isAuthenticated) return;
+
+    let active = true;
+    reportService
+      .list()
+      .then((data) => {
+        if (active) setMyReports(data);
+      })
+      .catch((error: Error) => {
+        if (active) setFetchError(error.message);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [session.isAuthenticated]);
 
   if (loading) {
     return (
@@ -47,13 +66,14 @@ export default function SubmissionsPage() {
     );
   }
 
-  // Filter reports to show only those submitted by the demo user (or all for demo)
-  const myReports: Report[] = reports;
-
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-semibold">My Submissions</h1>
       <p className="text-muted-foreground">Your submitted reports, status timeline and any requests for changes.</p>
+
+      {fetchError && (
+        <p className="mt-4 text-sm text-rose-600">{fetchError}</p>
+      )}
 
       {myReports.length === 0 ? (
         <Card className="mt-6">

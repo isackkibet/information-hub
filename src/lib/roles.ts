@@ -28,6 +28,10 @@ export function toRole(dbRole: DbRole | string): Role {
   return DB_TO_ROLE[dbRole as DbRole] ?? "Registered User";
 }
 
+export function toUserStatus(dbStatus: DbUserStatus | string): AccountStatus {
+  return DB_TO_STATUS[dbStatus as DbUserStatus] ?? "active";
+}
+
 export function toDbRole(role: Role): DbRole {
   return ROLE_TO_DB[role as Exclude<Role, "Visitor">] ?? "REGISTERED_USER";
 }
